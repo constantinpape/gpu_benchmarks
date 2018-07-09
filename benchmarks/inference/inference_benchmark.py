@@ -18,7 +18,21 @@ def single_inference(in_file, in_key,
 # TODO iterate over all chunk inference times
 # and accumulated gpu inference times and evaluate
 def evaluate_bench():
-    pass
+    all_files = os.listdir('.')
+    t_gpus = {}
+    t_blocks = []
+    for ff in all_files:
+        if ff.startswith('t_inference'):
+            gpu_id = int(ff.split('.')[0].split('_')[-1])
+            with open(ff) as f:
+                t_gpus[gpu_id] = float(f.readline())
+            os.remove(ff)
+        elif ff.startswith('t_offset'):
+            with open(ff) as f:
+                t_blocks.append(float(f.readline()))
+            os.remove(ff)
+        else:
+            continue
 
 
 def run_inference(input_file, input_key,

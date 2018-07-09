@@ -1,6 +1,6 @@
 import json
 import argparse
-import datetime
+import time
 
 from simpleference.inference.inference import run_inference
 from simpleference.inference.io import IoN5, IoHDF5
@@ -22,13 +22,11 @@ def inference(gpu_id, input_file, input_key,
     io_in = IoHDF5(input_file, input_key)
     io_out = IoN5(output_file, output_key)
 
-    # TODO log inference of individual blocks
-    t0 = datetime.now()
+    t0 = time.time()
     run_inference(prediction, preprocess, clip_float_to_uint8,
                   io_in, io_out, offset_list, input_block)
-    t1 = datetime.now()
+    t1 = time.time()
     t_diff = t1 - t0
-    t_diff = t_diff.microseconds / 1e6
 
     with open('t_inference_%i.txt' % gpu_id) as f:
         f.write(t_diff)

@@ -45,7 +45,8 @@ class TimeTrainingIters(Callback):
 
 def set_up_training(project_directory,
                     config,
-                    data_config):
+                    data_config,
+                    n_iters):
     model_name = config.get('model_name')
     model = getattr(models, model_name)(**config.get('model_kwargs'))
 
@@ -54,7 +55,7 @@ def set_up_training(project_directory,
     logger.info("Building trainer.")
 
     trainer = Trainer(model)\
-        .save_every((1000, 'iterations'), to_directory=os.path.join(project_directory, 'Weights'))\
+        .save_every((n_iters, 'iterations'), to_directory=os.path.join(project_directory, 'Weights'))\
         .build_criterion(loss)\
         .build_optimizer(**config.get('training_optimizer_kwargs'))\
         .evaluate_metric_every('never')\
@@ -76,7 +77,8 @@ def training(project_directory,
 
     trainer = set_up_training(project_directory,
                               config,
-                              data_config)
+                              data_config,
+                              max_training_iters)
     trainer.set_max_num_iterations(max_training_iters)
 
     # Bind loader
@@ -92,8 +94,8 @@ def training(project_directory,
     t0 = time.time()
     trainer.fit()
     t1 = time.time()
-    t_diff = t0 - t1
-    return t_diff.microseconds / 1e6
+    t_diff = t1 - t0
+    return t_diff
 
 
 def make_train_config(train_config_file, gpus):
@@ -119,7 +121,9 @@ def evaluate_benchmark(t_tot):
     print("Total train time:", t_tot)
     times = []
     with open('./tmp_log.txt') as f:
-        for l in f:
+        for i, l in enumerate(f):
+            if i == 0:
+                continue
             t = float(l.split()[1])
             times.append(t)
     print("Mean iteration time:", np.mean(times), "+-", np.std(times))
