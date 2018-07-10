@@ -2,6 +2,7 @@ import argparse
 import os
 from concurrent import futures
 from subprocess import call
+import numpy as np
 
 import h5py
 import z5py
@@ -15,7 +16,7 @@ def single_inference(in_file, in_key,
           in_file, in_key, out_file, out_key, checkpoint])
 
 
-# TODO iterate over all chunk inference times
+# iterate over all chunk inference times
 # and accumulated gpu inference times and evaluate
 def evaluate_bench():
     all_files = os.listdir('.')
@@ -27,26 +28,29 @@ def evaluate_bench():
             with open(ff) as f:
                 t_gpus[gpu_id] = float(f.readline())
             os.remove(ff)
+
         elif ff.startswith('t_offset'):
             with open(ff) as f:
                 t_blocks.append(float(f.readline()))
             os.remove(ff)
         else:
             continue
+    print("Mean block-inference:", np.mean(t_blocks), "+-", np.std(t_blocks))
+    print("Min block-inference", np.min(t_blocks))
+    print("Max block-inference", np.max(t_blocks))
+    for gpu, t in t_gpus.items():
+        print("Inference for gpu", gpu, ":", t, "s")
 
 
 def run_inference(input_file, input_key,
                   output_file, output_key,
                   checkpoint, n_gpus):
 
-    # TODO out block shapes
-    out_blocks = (100, 100, 100)
-    # TODO do we have affinity channels ?
+    out_blocks = (65, 675, 675)
     chunks = (1,) + out_blocks
 
     with h5py.File(input_file) as f:
         shape = f[input_key].shape
-    # TODO do we have affinity channels ?
     aff_shape = (3,) + shape
 
     f = z5py.N5File(output_file)
@@ -57,8 +61,10 @@ def run_inference(input_file, input_key,
                      output_shape=out_blocks)
 
     with futures.ProcessPoolExecutor(n_gpus) as pp:
-        tasks = [pp.submit(single_inference, input_file, input_key,
-                           output_file, output_key, gpu_id)
+        tasks = [pp.submit(single_inference,
+                           input_file, input_key,
+                           output_file, output_key,
+                           checkpoint, gpu_id)
                  for gpu_id in range(n_gpus)]
         [t.result() for t in tasks]
 
