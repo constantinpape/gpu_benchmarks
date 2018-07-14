@@ -134,8 +134,8 @@ def evaluate_benchmark(t_tot):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--project_directory', type=str, default='../traindir')
-    parser.add_argument('--gpus', nargs='+', default=[0], type=int)
+    parser.add_argument('project_directory', type=str)
+    parser.add_argument('ngpus', type=int)
     parser.add_argument('--n_iters', type=int, default=int(1001))
     parser.add_argument('--input_path', type=str, default='../data/sample_A_20160501.hdf')
     parser.add_argument('--raw_key', type=str, default='volumes/raw')
@@ -147,10 +147,11 @@ def main():
     if not os.path.exists(project_directory):
         os.mkdir(project_directory)
 
-    gpus = list(args.gpus)
+    # gpus = list(args.ngpus)
     # set the proper CUDA_VISIBLE_DEVICES env variables
-    os.environ["CUDA_VISIBLE_DEVICES"] = ",".join(map(str, gpus))
-    gpus = list(range(len(gpus)))
+    # os.environ["CUDA_VISIBLE_DEVICES"] = ",".join(map(str, gpus))
+    # gpus = list(range(len(gpus)))
+    gpus = list(range(args.ngpus))
 
     train_config = os.path.join(project_directory, 'train_config.yml')
     make_train_config(train_config, gpus)

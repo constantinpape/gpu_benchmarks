@@ -73,13 +73,13 @@ def run_inference(input_file, input_key,
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('checkpoint', type=str)
+    parser.add_argument('output_file', type=str)
     parser.add_argument('n_gpus', type=int)
+    parser.add_argument('--checkpoint', type=str,
+                        default='../data/')  # TODO path to ckpt
     parser.add_argument('--input_file', type=str,
                         default='../data/sample_A_padded_20160501.hdf')
     parser.add_argument('--input_key', type=str, default='volumes/raw')
-    parser.add_argument('--output_file', type=str,
-                        default='../data/sample_A_padded.n5')
     parser.add_argument('--output_key', type=str, default='volumes/affinities')
     args = parser.parse_args()
 
