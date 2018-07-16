@@ -1,3 +1,5 @@
+#! /g/kreshuk/pape/Work/software/conda/miniconda3/envs/inferno/bin/python
+
 import json
 import argparse
 import time

@@ -1,3 +1,5 @@
+#! /g/kreshuk/pape/Work/software/conda/miniconda3/envs/inferno/bin/python
+
 import os
 import sys
 import logging
@@ -13,6 +15,13 @@ from inferno.extensions.criteria import SorensenDiceLoss
 from inferno.trainers.callbacks import Callback
 import neurofire.models as models
 from skunkworks.datasets.cremi.loaders import get_cremi_loaders
+
+import torch
+print()
+print(torch.__file__)
+print(torch.version.cuda)
+print(torch.cuda.device_count())
+print()
 
 
 logging.basicConfig(format='[+][%(asctime)-15s][%(name)s %(levelname)s]'

@@ -1,3 +1,7 @@
+#! /g/kreshuk/pape/Work/software/conda/miniconda3/envs/inferno/bin/python
+
+import sys
+
 import argparse
 import os
 from concurrent import futures
@@ -38,6 +42,7 @@ def evaluate_bench():
     print("Mean block-inference:", np.mean(t_blocks), "+-", np.std(t_blocks))
     print("Min block-inference", np.min(t_blocks))
     print("Max block-inference", np.max(t_blocks))
+    print("Sum block inference", np.sum(t_blocks))
     for gpu, t in t_gpus.items():
         print("Inference for gpu", gpu, ":", t, "s")
 
