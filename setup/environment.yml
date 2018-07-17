@@ -1,0 +1,19 @@
+name: inferno
+
+channels:
+  - conda-forge
+  - pytorch
+
+dependencies:
+  - python=3.6
+  - pytorch
+  - torchvision
+  - cuda91
+  - scipy
+  - scikit-image
+  - h5py
+  - dill
+  - pyyaml
+  - tensorboardx
+  - vigra
+  - xtensor-python
