@@ -6,7 +6,7 @@ import time
 
 from simpleference.inference.inference import run_inference
 from simpleference.inference.io import IoN5, IoHDF5
-from simpleference.backends.pytorch import InfernoPredict
+from simpleference.backends.pytorch import PyTorchPredict
 from simpleference.backends.pytorch.preprocess import preprocess
 from simpleference.postprocessing import clip_float_to_uint8
 
@@ -44,8 +44,7 @@ def inference(gpu_id, input_file, input_key,
     with open('offsets/list_gpu_%i.json' % gpu_id, 'r') as f:
         offset_list = json.load(f)
 
-    prediction = InfernoPredict(checkpoint, crop=output_blocks, gpu=0,
-                                use_best=False)
+    prediction = PyTorchPredict(checkpoint, crop=output_blocks, gpu=gpu_id)
     io_in = IoHDF5(input_file, [input_key])
     io_out = IoN5(output_file, [output_key],
                   channel_order=[list(range(3))])
