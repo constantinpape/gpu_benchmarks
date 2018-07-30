@@ -17,11 +17,6 @@ import neurofire.models as models
 from skunkworks.datasets.cremi.loaders import get_cremi_loaders
 
 import torch
-print()
-print(torch.__file__)
-print(torch.version.cuda)
-print(torch.cuda.device_count())
-print()
 
 
 logging.basicConfig(format='[+][%(asctime)-15s][%(name)s %(levelname)s]'
@@ -62,13 +57,14 @@ def set_up_training(project_directory,
     loss = SorensenDiceLoss()
     # Build trainer and validation metric
     logger.info("Building trainer.")
+    log_file = os.path.join(project_directory, 'tmp_log.txt')
 
     trainer = Trainer(model)\
         .save_every((n_iters, 'iterations'), to_directory=os.path.join(project_directory, 'Weights'))\
         .build_criterion(loss)\
         .build_optimizer(**config.get('training_optimizer_kwargs'))\
         .evaluate_metric_every('never')\
-        .register_callback(TimeTrainingIters('./tmp_log.txt'))
+        .register_callback(TimeTrainingIters(log_file))
     return trainer
 
 
@@ -114,7 +110,7 @@ def make_train_config(train_config_file, gpus):
         yaml.dump(template, f)
 
 
-def make_data_config(data_config_file, in_path, raw_key, gt_key, n_batches, workers_per_gpu=10):
+def make_data_config(data_config_file, in_path, raw_key, gt_key, n_batches, workers_per_gpu=4):
     template = yaml2dict('./template_config/data_config.yml')
     template['volume_config']['raw']['path'] = in_path
     template['volume_config']['raw']['path_in_h5_dataset'] = raw_key
@@ -126,10 +122,11 @@ def make_data_config(data_config_file, in_path, raw_key, gt_key, n_batches, work
         yaml.dump(template, f)
 
 
-def evaluate_benchmark(t_tot):
+def evaluate_benchmark(project_directory, t_tot):
     print("Total train time:", t_tot)
     times = []
-    with open('./tmp_log.txt') as f:
+    log_file = os.path.join(project_directory, 'tmp_log.txt')
+    with open(log_file) as f:
         for i, l in enumerate(f):
             if i == 0:
                 continue
@@ -156,6 +153,10 @@ def main():
     if not os.path.exists(project_directory):
         os.mkdir(project_directory)
 
+    print("Device counts (expected number: %i):" % args.ngpus)
+    print("Visible devices:", os.environ['CUDA_VISIBLE_DEVICES'])
+    print("Torch count:", torch.cuda.device_count())
+
     # gpus = list(args.ngpus)
     # set the proper CUDA_VISIBLE_DEVICES env variables
     # os.environ["CUDA_VISIBLE_DEVICES"] = ",".join(map(str, gpus))
@@ -176,7 +177,7 @@ def main():
                      train_config,
                      data_config,
                      max_training_iters=args.n_iters)
-    evaluate_benchmark(t_tot)
+    evaluate_benchmark(project_directory, t_tot)
 
 
 if __name__ == '__main__':
